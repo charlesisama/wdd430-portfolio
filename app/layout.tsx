@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -27,7 +27,9 @@ export default function RootLayout({
           {children}
         </div>
 
-        <Footer />
+        <Suspense fallback={<footer className="bg-slate-900 mt-12 py-8" />}>
+          <Footer />
+        </Suspense>
       </body>
     </html>
   );

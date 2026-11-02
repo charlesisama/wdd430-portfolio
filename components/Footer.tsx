@@ -1,6 +1,10 @@
+import { connection } from "next/server";
 
-export default function Footer() {
-   
+
+export default async function Footer() {
+
+    await connection();
+
 
     return (
         <footer className="bg-slate-900 text-white mt-12">
