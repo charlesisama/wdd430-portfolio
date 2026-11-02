@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Core Concepts Practice</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/jsx">
+    function Greeting(props) {
+      return <h2>Welcome aboard, {props.name}!</h2>;
+    }
+
+    function Counter() {
+      const [count, setCount] = React.useState(0);
+
+      return (
+        <section>
+          <h3>Counter Example</h3>
+          <p>Current count: {count}</p>
+          <button onClick={() => setCount(count + 1)}>Increment</button>
+          <button onClick={() => setCount(count - 1)}>Decrement</button>
+        </section>
+      );
+    }
+
+    function App() {
+      return (
+        <main>
+          <h1>React Core Concepts</h1>
+          <Greeting name="Alice" />
+          <Counter />
+        </main>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+
+</html>
