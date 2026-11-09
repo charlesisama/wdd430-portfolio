@@ -1,90 +1,122 @@
-import Link from "next/link";
 
-const academicProjects = [
-    {
-        title: "WDD430 Portfolio Application",
-        course: "WDD430 – Web Full-stack Development",
-        description:
-            "A personal portfolio application built with Next.js, React, TypeScript, and Tailwind CSS. It demonstrates component-based development, application routing, reusable layouts, and modern frontend development practices.",
-        technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS"],
-        link: "https://github.com/charlesisama/wdd430-portfolio",
-    },
-    {
-        title: "Student Course Management API",
-        course: "CSE341 – Web Services",
-        description:
-            "A backend development project focused on creating RESTful API endpoints for managing student and course records. It includes MongoDB integration, CRUD operations, authentication, and API documentation.",
-        technologies: ["Node.js", "Express", "MongoDB", "Swagger"],
-        link: "https://github.com/charlesisama/CSE341",
-    },
-    {
-        title: "Dynamic Book Discovery Application",
-        course: "WDD330 – Frontend Web Development",
-        description:
-            "A collaborative web application that integrates external book APIs to support book discovery and personal reading-list management.",
-        technologies: ["JavaScript", "HTML", "CSS", "REST APIs"],
-        link: "https://github.com/charlesisama/wdd330-team-one-",
-    },
-];
+import { Suspense } from "react";
+import type { Project } from "@/lib/projects-db";
+import { getBaseUrl } from "@/lib/get-base-url";
+
+async function SchoolProjectsContent() {
+    const baseUrl = await getBaseUrl();
+
+    const response = await fetch(
+        `${baseUrl}/api/projects?type=school`,
+        {
+            cache: "no-store",
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch academic projects");
+    }
+
+    const result: { data: Project[] } = await response.json();
+    const projects = result.data;
+
+    return (
+        <main className="mx-auto max-w-6xl px-6 py-12">
+            <section className="mb-10">
+                <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
+                    Portfolio / Academic
+                </p>
+
+                <h1 className="mb-4 text-4xl font-bold text-slate-900">
+                    Academic Projects
+                </h1>
+
+                <p className="max-w-2xl text-lg leading-relaxed text-slate-600">
+                    This collection highlights projects completed during
+                    my software development studies. They demonstrate my
+                    understanding of programming concepts, application
+                    development, and practical problem-solving.
+                </p>
+            </section>
+
+            <section>
+                <div className="mb-6 flex items-center justify-between gap-3">
+                    <h2 className="text-2xl font-bold text-slate-900">
+                        Coursework Projects
+                    </h2>
+
+                    <span className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+                        {projects.length} Projects
+                    </span>
+                </div>
+
+                {projects.length === 0 ? (
+                    <p className="rounded-lg bg-slate-50 p-6 text-slate-600">
+                        No academic projects are currently available.
+                    </p>
+                ) : (
+                    <div className="grid gap-6 md:grid-cols-2">
+                        {projects.map((project) => (
+                            <article
+                                key={project.id}
+                                className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md"
+                            >
+                                <h3 className="mb-3 text-xl font-bold text-slate-900">
+                                    {project.title}
+                                </h3>
+
+                                <p className="mb-5 leading-relaxed text-slate-600">
+                                    {project.description}
+                                </p>
+
+                                <div className="mb-5">
+                                    <h4 className="mb-2 text-sm font-semibold text-slate-800">
+                                        Technologies Used
+                                    </h4>
+
+                                    <div className="flex flex-wrap gap-2">
+                                        {project.technologies.map((technology) => (
+                                            <span
+                                                key={technology}
+                                                className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
+                                            >
+                                                {technology}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {project.link && (
+                                    <a
+                                        href={project.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-semibold text-blue-600 hover:underline"
+                                    >
+                                        View Project →
+                                    </a>
+                                )}
+                            </article>
+                        ))}
+                    </div>
+                )}
+            </section>
+        </main>
+    );
+}
 
 export default function SchoolProjectsPage() {
     return (
-        <main>
-            <div className="mb-8">
-                <p className="text-blue-600 font-semibold text-sm mb-2">
-                    LEARNING BY BUILDING
-                </p>
-
-                <h2 className="text-2xl font-bold text-slate-900 mb-3">
-                    Academic Projects
-                </h2>
-
-                <p className="text-slate-600 leading-relaxed">
-                    My academic projects provide opportunities to apply concepts
-                    learned in software development, from frontend interfaces
-                    to backend services and database management.
-                </p>
-            </div>
-
-            <div className="space-y-6">
-                {academicProjects.map((project) => (
-                    <article
-                        key={project.title}
-                        className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm"
-                    >
-                        <p className="text-blue-600 text-xs font-semibold uppercase mb-3">
-                            {project.course}
-                        </p>
-
-                        <h3 className="text-xl font-bold text-slate-900 mb-3">
-                            {project.title}
-                        </h3>
-
-                        <p className="text-slate-600 leading-relaxed mb-5">
-                            {project.description}
-                        </p>
-
-                        <div className="flex flex-wrap gap-2 mb-5">
-                            {project.technologies.map((technology) => (
-                                <span
-                                    key={technology}
-                                    className="text-xs bg-slate-100 text-slate-700 px-3 py-1 rounded-full"
-                                >
-                                    {technology}
-                                </span>
-                            ))}
-                        </div>
-
-                        <Link
-                            href={project.link}
-                            target="_blank"
-                            className="font-semibold text-blue-600 hover:text-blue-800"
-                        >
-                            View Project →
-                        </Link>
-                    </article>
-                ))}
-            </div>
-        </main>
+        <Suspense
+            fallback={
+                <main className="mx-auto max-w-6xl px-6 py-12">
+                    <p className="animate-pulse text-slate-500">
+                        Loading academic projects...
+                    </p>
+                </main>
+            }
+        >
+            <SchoolProjectsContent />
+        </Suspense>
     );
 }

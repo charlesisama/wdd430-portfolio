@@ -1,99 +1,121 @@
-import Link from "next/link";
 
-const projects = [
-    {
-        title: "StudyShelf",
-        category: "Book Discovery Application",
-        description:
-            "A personal book and study discovery application developed collaboratively. It allows users to discover books through external APIs and organize their personal reading lists using browser local storage.",
-        technologies: [
-            "JavaScript",
-            "HTML",
-            "CSS",
-            "Google Books API",
-            "Open Library API",
-            "Local Storage",
-        ],
-        link: "https://github.com/charlesisama/wdd330-team-one-",
-    },
-    {
-        title: "Student Course Management API",
-        category: "Backend Development",
-        description:
-            "A RESTful API designed to manage student and course information. The project demonstrates backend development, database integration, CRUD operations, API documentation, and deployment.",
-        technologies: [
-            "Node.js",
-            "Express",
-            "MongoDB",
-            "Swagger",
-            "JavaScript",
-        ],
-        link: "https://github.com/charlesisama/CSE341",
-    },
-];
+import { Suspense } from "react";
+import type { Project } from "@/lib/projects-db";
+import { getBaseUrl } from "@/lib/get-base-url";
+
+async function OpenSourceProjectsContent() {
+    const baseUrl = await getBaseUrl();
+
+    const response = await fetch(
+        `${baseUrl}/api/projects?type=opensource`,
+        {
+            cache: "no-store",
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch open source projects");
+    }
+
+    const result: { data: Project[] } = await response.json();
+    const projects = result.data;
+
+    return (
+        <main className="mx-auto max-w-6xl px-6 py-12">
+            <section className="mb-10">
+                <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
+                    Portfolio / Open Source
+                </p>
+
+                <h1 className="mb-4 text-4xl font-bold text-slate-900">
+                    Open Source Projects
+                </h1>
+
+                <p className="max-w-2xl text-lg leading-relaxed text-slate-600">
+                    These projects showcase my practical experience in
+                    building software applications, working with APIs,
+                    and applying modern web development technologies.
+                </p>
+            </section>
+
+            <section>
+                <div className="mb-6 flex items-center justify-between gap-3">
+                    <h2 className="text-2xl font-bold text-slate-900">
+                        Project Collection
+                    </h2>
+
+                    <span className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+                        {projects.length} Projects
+                    </span>
+                </div>
+
+                {projects.length === 0 ? (
+                    <p className="rounded-lg bg-slate-50 p-6 text-slate-600">
+                        No open source projects are currently available.
+                    </p>
+                ) : (
+                    <div className="grid gap-6 md:grid-cols-2">
+                        {projects.map((project) => (
+                            <article
+                                key={project.id}
+                                className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md"
+                            >
+                                <h3 className="mb-3 text-xl font-bold text-slate-900">
+                                    {project.title}
+                                </h3>
+
+                                <p className="mb-5 leading-relaxed text-slate-600">
+                                    {project.description}
+                                </p>
+
+                                <div className="mb-5">
+                                    <h4 className="mb-2 text-sm font-semibold text-slate-800">
+                                        Technologies Used
+                                    </h4>
+
+                                    <div className="flex flex-wrap gap-2">
+                                        {project.technologies.map((technology) => (
+                                            <span
+                                                key={technology}
+                                                className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
+                                            >
+                                                {technology}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {project.link && (
+                                    <a
+                                        href={project.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-semibold text-blue-600 hover:underline"
+                                    >
+                                        View Project →
+                                    </a>
+                                )}
+                            </article>
+                        ))}
+                    </div>
+                )}
+            </section>
+        </main>
+    );
+}
 
 export default function OpenSourceProjectsPage() {
     return (
-        <main>
-            <div className="mb-8">
-                <p className="text-blue-600 font-semibold text-sm mb-2">
-                    PRACTICAL DEVELOPMENT
-                </p>
-
-                <h2 className="text-2xl font-bold text-slate-900 mb-3">
-                    Open Source & Personal Projects
-                </h2>
-
-                <p className="text-slate-600 leading-relaxed">
-                    These projects reflect my practical experience in building
-                    applications, working with APIs, managing data, and collaborating
-                    on software solutions.
-                </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {projects.map((project) => (
-                    <article
-                        key={project.title}
-                        className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm"
-                    >
-                        <p className="text-blue-600 text-xs font-semibold uppercase mb-3">
-                            {project.category}
-                        </p>
-
-                        <h3 className="text-xl font-bold text-slate-900 mb-3">
-                            {project.title}
-                        </h3>
-
-                        <p className="text-slate-600 leading-relaxed mb-5">
-                            {project.description}
-                        </p>
-
-                        <h4 className="text-sm font-semibold text-slate-800 mb-3">
-                            Technologies
-                        </h4>
-
-                        <div className="flex flex-wrap gap-2 mb-6">
-                            {project.technologies.map((technology) => (
-                                <span
-                                    key={technology}
-                                    className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full"
-                                >
-                                    {technology}
-                                </span>
-                            ))}
-                        </div>
-
-                        <Link
-                            href={project.link}
-                            target="_blank"
-                            className="font-semibold text-blue-600 hover:text-blue-800"
-                        >
-                            View on GitHub →
-                        </Link>
-                    </article>
-                ))}
-            </div>
-        </main>
+        <Suspense
+            fallback={
+                <main className="mx-auto max-w-6xl px-6 py-12">
+                    <p className="animate-pulse text-slate-500">
+                        Loading open source projects...
+                    </p>
+                </main>
+            }
+        >
+            <OpenSourceProjectsContent />
+        </Suspense>
     );
 }

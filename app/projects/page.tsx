@@ -1,77 +1,160 @@
-import Link from "next/link";
 
-const projectCategories = [
-    {
-        title: "Open Source & Personal Projects",
-        description:
-            "Explore my independent and collaborative software development projects, including web applications, APIs, and practical programming experiments.",
-        href: "/projects/opensource",
-        number: "01",
-    },
-    {
-        title: "Academic Projects",
-        description:
-            "Explore projects developed through my Software Development education, covering frontend development, backend systems, databases, and full-stack technologies.",
-        href: "/projects/school",
-        number: "02",
-    },
-];
+import { Suspense } from "react";
+import Link from "next/link";
+import type { Project } from "@/lib/projects-db";
+import { getBaseUrl } from "@/lib/get-base-url";
+
+async function ProjectsContent() {
+    const baseUrl = await getBaseUrl();
+
+    const response = await fetch(`${baseUrl}/api/projects`, {
+        cache: "no-store",
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch projects");
+    }
+
+    const result: { data: Project[] } = await response.json();
+    const projects = result.data;
+
+    return (
+        <main className="mx-auto max-w-6xl px-6 py-12">
+            <section className="mb-12">
+                <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
+                    My Work
+                </p>
+
+                <h1 className="mb-4 text-4xl font-bold text-slate-900">
+                    Projects Portfolio
+                </h1>
+
+                <p className="max-w-2xl text-lg leading-relaxed text-slate-600">
+                    Explore a collection of my software development projects,
+                    including academic assignments and independent projects.
+                    Each project reflects my continuous learning and practical
+                    application of modern web technologies.
+                </p>
+            </section>
+
+            <section className="mb-12 grid gap-6 md:grid-cols-2">
+                <Link
+                    href="/projects/opensource"
+                    className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                >
+                    <h2 className="mb-3 text-xl font-bold text-slate-900">
+                        Open Source Projects
+                    </h2>
+
+                    <p className="mb-4 text-slate-600">
+                        Explore independent and collaborative projects that
+                        demonstrate practical software development skills.
+                    </p>
+
+                    <span className="font-semibold text-blue-600">
+                        Explore projects →
+                    </span>
+                </Link>
+
+                <Link
+                    href="/projects/school"
+                    className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                >
+                    <h2 className="mb-3 text-xl font-bold text-slate-900">
+                        Academic Projects
+                    </h2>
+
+                    <p className="mb-4 text-slate-600">
+                        Discover projects completed as part of my software
+                        development coursework.
+                    </p>
+
+                    <span className="font-semibold text-blue-600">
+                        Explore projects →
+                    </span>
+                </Link>
+            </section>
+
+            <section>
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                    <h2 className="text-2xl font-bold text-slate-900">
+                        All Projects
+                    </h2>
+
+                    <span className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+                        {projects.length} Projects
+                    </span>
+                </div>
+
+                {projects.length === 0 ? (
+                    <p className="rounded-lg bg-slate-50 p-6 text-slate-600">
+                        No projects are currently available.
+                    </p>
+                ) : (
+                    <div className="grid gap-6 md:grid-cols-2">
+                        {projects.map((project) => (
+                            <article
+                                key={project.id}
+                                className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md"
+                            >
+                                <div className="mb-3 flex items-start justify-between gap-3">
+                                    <h3 className="text-xl font-bold text-slate-900">
+                                        {project.title}
+                                    </h3>
+
+                                    <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium capitalize text-slate-600">
+                                        {project.type === "opensource"
+                                            ? "Open Source"
+                                            : "Academic"}
+                                    </span>
+                                </div>
+
+                                <p className="mb-5 leading-relaxed text-slate-600">
+                                    {project.description}
+                                </p>
+
+                                <div className="mb-5 flex flex-wrap gap-2">
+                                    {project.technologies.map((technology) => (
+                                        <span
+                                            key={technology}
+                                            className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
+                                        >
+                                            {technology}
+                                        </span>
+                                    ))}
+                                </div>
+
+                                {project.link && (
+                                    <a
+                                        href={project.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-semibold text-blue-600 hover:underline"
+                                    >
+                                        View Project →
+                                    </a>
+                                )}
+                            </article>
+                        ))}
+                    </div>
+                )}
+            </section>
+        </main>
+    );
+}
 
 export default function ProjectsPage() {
     return (
-        <main>
-            <section className="mb-10">
-                <h2 className="text-2xl font-bold text-slate-900 mb-3">
-                    Building Through Practice
-                </h2>
-
-                <p className="text-slate-600 leading-relaxed max-w-3xl">
-                    My development journey combines practical engineering experience
-                    with an expanding knowledge of software development. These projects
-                    represent my progress in learning, experimenting, collaborating,
-                    and building useful digital solutions.
-                </p>
-            </section>
-
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {projectCategories.map((category) => (
-                    <article
-                        key={category.number}
-                        className="bg-white border border-slate-200 rounded-xl p-7 shadow-sm hover:shadow-md transition-shadow"
-                    >
-                        <p className="text-blue-600 font-bold text-sm mb-4">
-                            {category.number}
-                        </p>
-
-                        <h3 className="text-xl font-bold text-slate-900 mb-3">
-                            {category.title}
-                        </h3>
-
-                        <p className="text-slate-600 leading-relaxed mb-6">
-                            {category.description}
-                        </p>
-
-                        <Link
-                            href={category.href}
-                            className="inline-flex items-center font-semibold text-blue-600 hover:text-blue-800"
-                        >
-                            Explore Projects →
-                        </Link>
-                    </article>
-                ))}
-            </section>
-
-            <section className="mt-12 rounded-xl bg-blue-50 border border-blue-100 p-7">
-                <h2 className="text-xl font-bold text-slate-900 mb-3">
-                    Engineering Meets Software
-                </h2>
-
-                <p className="text-slate-700 leading-relaxed">
-                    I am particularly interested in how software can improve
-                    industrial processes, technical operations, data management,
-                    and everyday problem-solving.
-                </p>
-            </section>
-        </main>
+        <Suspense
+            fallback={
+                <main className="mx-auto max-w-6xl px-6 py-12">
+                    <p className="animate-pulse text-slate-500">
+                        Loading projects...
+                    </p>
+                </main>
+            }
+        >
+            <ProjectsContent />
+        </Suspense>
     );
 }
