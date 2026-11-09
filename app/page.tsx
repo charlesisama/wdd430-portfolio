@@ -42,7 +42,7 @@ export default function Home() {
         </p>
 
         <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-5">
-          Hello, I'm Charles Isama.
+          Hello, I am Charles Isama.
         </h1>
 
         <h2 className="text-xl md:text-2xl text-slate-600 mb-6">
