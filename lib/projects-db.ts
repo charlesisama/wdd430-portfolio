@@ -52,8 +52,11 @@ export async function fetchFilteredProjects(
     currentPage: number
 ): Promise<Project[]> {
     const searchTerm = query.trim();
-    const offset =
-        (Math.max(1, currentPage) - 1) * ITEMS_PER_PAGE;
+    const page = Number.isSafeInteger(currentPage) && currentPage > 0
+        ? currentPage
+        : 1;
+
+    const offset = (page - 1) * ITEMS_PER_PAGE;
 
     if (!searchTerm) {
         const { rows } = await sql<Project>`
