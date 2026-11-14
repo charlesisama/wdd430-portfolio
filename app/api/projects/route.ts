@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import { getProjects } from "@/lib/projects-db";
 
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const filteredProjects = getProjects(
+        const filteredProjects = await getProjects(
             type as "opensource" | "school" | null
         );
 

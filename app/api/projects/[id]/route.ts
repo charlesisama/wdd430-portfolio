@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import { getProjectById } from "@/lib/projects-db";
 
@@ -11,36 +12,45 @@ export async function GET(
     _request: NextRequest,
     { params }: RouteContext
 ) {
-    const routeParams = await params;
-    const rawId = routeParams.id;
+    try {
+        const routeParams = await params;
+        const rawId = routeParams.id;
 
-    console.log("Received project ID:", rawId);
+        console.log("Received project ID:", rawId);
 
-    const projectId = Number(rawId);
+        const projectId = Number(rawId);
 
-    console.log("Converted project ID:", projectId);
+        console.log("Converted project ID:", projectId);
 
-    if (!Number.isSafeInteger(projectId) || projectId <= 0) {
+        if (!Number.isSafeInteger(projectId) || projectId <= 0) {
+            return NextResponse.json(
+                {
+                    error: "Invalid project ID",
+                    receivedId: rawId,
+                },
+                { status: 400 }
+            );
+        }
+
+        const project = await getProjectById(projectId);
+
+        if (!project) {
+            return NextResponse.json(
+                { error: "Project not found" },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json({
+            success: true,
+            data: project,
+        });
+    } catch (error) {
+        console.error("Error retrieving project:", error);
+
         return NextResponse.json(
-            {
-                error: "Invalid project ID",
-                receivedId: rawId,
-            },
-            { status: 400 }
+            { error: "Unable to retrieve project" },
+            { status: 500 }
         );
     }
-
-    const project = getProjectById(projectId);
-
-    if (!project) {
-        return NextResponse.json(
-            { error: "Project not found" },
-            { status: 404 }
-        );
-    }
-
-    return NextResponse.json({
-        success: true,
-        data: project,
-    });
 }
