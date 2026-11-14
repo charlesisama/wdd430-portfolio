@@ -1,22 +1,50 @@
 
 import { Suspense } from "react";
 import Link from "next/link";
-import type { Project } from "@/lib/projects-db";
-import { getBaseUrl } from "@/lib/get-base-url";
+import {
+    fetchFilteredProjects,
+    fetchProjectsPages,
+} from "@/lib/projects-db";
+import ProjectSearch from "@/components/ProjectSearch";
+import Pagination from "@/components/Pagination";
 
-async function ProjectsContent() {
-    const baseUrl = await getBaseUrl();
+interface ProjectsContentProps {
+    searchParams: Promise<{
+        query?: string;
+        page?: string;
+    }>;
+}
 
-    const response = await fetch(`${baseUrl}/api/projects`, {
-        cache: "no-store",
-    });
+async function ProjectsContent({
+    searchParams,
+}: ProjectsContentProps) {
+    const params = await searchParams;
 
-    if (!response.ok) {
-        throw new Error("Failed to fetch projects");
-    }
+    // Validate and sanitize the search query.
+    const query = (params.query ?? "").trim().slice(0, 100);
 
-    const result: { data: Project[] } = await response.json();
-    const projects = result.data;
+    // Validate the requested page number.
+    const requestedPage = Number(params.page);
+
+    const currentPage =
+        Number.isSafeInteger(requestedPage) && requestedPage > 0
+            ? requestedPage
+            : 1;
+
+    // Calculate the total number of pages.
+    const totalPages = await fetchProjectsPages(query);
+
+    // Prevent requests for pages beyond the available results.
+    const validPage = Math.min(
+        currentPage,
+        Math.max(1, totalPages)
+    );
+
+    // Retrieve projects for the requested page.
+    const projects = await fetchFilteredProjects(
+        query,
+        validPage
+    );
 
     return (
         <main className="mx-auto max-w-6xl px-6 py-12">
@@ -76,19 +104,29 @@ async function ProjectsContent() {
             </section>
 
             <section>
-                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                    <h2 className="text-2xl font-bold text-slate-900">
+                <div className="mb-6">
+                    <h2 className="mb-4 text-2xl font-bold text-slate-900">
                         All Projects
                     </h2>
 
-                    <span className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
-                        {projects.length} Projects
-                    </span>
+                    <ProjectSearch key={query} />
+
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                        <p className="text-sm text-slate-600">
+                            {query
+                                ? `Search results for "${query}"`
+                                : "Browse all available projects"}
+                        </p>
+
+                        <span className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+                            {projects.length} Projects
+                        </span>
+                    </div>
                 </div>
 
                 {projects.length === 0 ? (
                     <p className="rounded-lg bg-slate-50 p-6 text-slate-600">
-                        No projects are currently available.
+                        No projects found. Try another search term.
                     </p>
                 ) : (
                     <div className="grid gap-6 md:grid-cols-2">
@@ -138,12 +176,23 @@ async function ProjectsContent() {
                         ))}
                     </div>
                 )}
+
+                <Pagination totalPages={totalPages} />
             </section>
         </main>
     );
 }
 
-export default function ProjectsPage() {
+interface ProjectsPageProps {
+    searchParams: Promise<{
+        query?: string;
+        page?: string;
+    }>;
+}
+
+export default function ProjectsPage({
+    searchParams,
+}: ProjectsPageProps) {
     return (
         <Suspense
             fallback={
@@ -154,7 +203,7 @@ export default function ProjectsPage() {
                 </main>
             }
         >
-            <ProjectsContent />
+            <ProjectsContent searchParams={searchParams} />
         </Suspense>
     );
 }
