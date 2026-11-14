@@ -1,10 +1,11 @@
 
-import { Suspense } from "react";
+
 import type { Project } from "@/lib/projects-db";
 import { getBaseUrl } from "@/lib/get-base-url";
 
 async function OpenSourceProjectsContent() {
     const baseUrl = await getBaseUrl();
+
 
     const response = await fetch(
         `${baseUrl}/api/projects?type=opensource`,
@@ -104,18 +105,8 @@ async function OpenSourceProjectsContent() {
     );
 }
 
-export default function OpenSourceProjectsPage() {
-    return (
-        <Suspense
-            fallback={
-                <main className="mx-auto max-w-6xl px-6 py-12">
-                    <p className="animate-pulse text-slate-500">
-                        Loading open source projects...
-                    </p>
-                </main>
-            }
-        >
-            <OpenSourceProjectsContent />
-        </Suspense>
-    );
+export default async function OpenSourceProjectsPage() {
+    return <OpenSourceProjectsContent />;
 }
+
+
