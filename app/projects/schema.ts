@@ -14,7 +14,10 @@ export const ProjectFormSchema = z.object({
         .number()
         .int("Year must be a whole number.")
         .min(1900, "Enter a valid completion year.")
-        .max(2100, "Enter a realistic completion year."),
+        .refine(
+            (year) => year <= new Date().getFullYear(),
+            "Year cannot be in the future."
+        ),
 });
 
 export type FormState = {
