@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import NavLinks from "./NavLinks";
+import { Suspense } from "react";
 
 export default function Header() {
     return (
@@ -27,7 +28,9 @@ export default function Header() {
                     </div>
                 </Link>
 
-                <NavLinks />
+                <Suspense fallback={<div className="h-10" />}>
+                    <NavLinks />
+                </Suspense>
 
             </div>
         </header>

@@ -7,6 +7,7 @@ import {
 } from "@/lib/projects-db";
 import ProjectSearch from "@/components/ProjectSearch";
 import Pagination from "@/components/Pagination";
+import { deleteProject } from "./actions";
 
 interface ProjectsContentProps {
     searchParams: Promise<{
@@ -171,16 +172,41 @@ async function ProjectsContent({
                                     ))}
                                 </div>
 
-                                {project.link && (
-                                    <a
-                                        href={project.link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="font-semibold text-blue-600 hover:underline"
+                                <div className="flex flex-wrap items-center gap-4">
+                                    {project.link && (
+                                        <a
+                                            href={project.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="font-semibold text-blue-600 hover:underline"
+                                        >
+                                            View Project →
+                                        </a>
+                                    )}
+
+                                    <Link
+                                        href={`/projects/${project.id}/edit`}
+                                        className="font-semibold text-slate-700 hover:text-blue-600"
                                     >
-                                        View Project →
-                                    </a>
-                                )}
+                                        Edit Project
+                                    </Link>
+
+
+<form action={deleteProject}>
+                                        <input
+                                            type="hidden"
+                                            name="id"
+                                            value={project.id}
+                                        />
+                                        <button
+                                            type="submit"
+                                            className="rounded-md bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-700"
+                                        >
+                                            Delete
+                                        </button>
+                                    </form>
+
+                                </div>
                             </article>
                         ))}
                     </div>
