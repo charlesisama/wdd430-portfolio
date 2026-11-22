@@ -105,12 +105,21 @@ async function ProjectsContent({
 
             <section>
                 <div className="mb-6">
-                    <h2 className="mb-4 text-2xl font-bold text-slate-900">
-                        All Projects
-                    </h2>
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+                        <h2 className="text-2xl font-bold text-slate-900">
+                            All Projects
+                        </h2>
+
+                        <Link
+                            href="/projects/new"
+                            className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+                        >
+                            + Add New Project
+                        </Link>
+                    </div>
 
                     <ProjectSearch key={query} />
-
+                    
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                         <p className="text-sm text-slate-600">
                             {query
