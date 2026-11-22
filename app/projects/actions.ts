@@ -1,85 +1,82 @@
-
 "use server";
 
 import { sql } from "@vercel/postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
+import { ProjectFormSchema, type FormState } from "./schema";
 
-// 1. Define the validation rules
-const ProjectSchema = z.object({
-    title: z.string().min(3, "Title must contain at least 3 characters."),
-    description: z.string().min(20, "Description must contain at least 20 characters."),
-    type: z.enum(["opensource", "school"]),
-    technologies: z.string().min(2, "Enter at least one technology."),
-    link: z.union([
-        z.string().url("Enter a valid URL."),
-        z.literal("")
-    ]),
-});
 
 // 2. Create the Server Action
-export async function createProject(formData: FormData) {
 
-    // 3. Collect submitted form values
-    const rawData = {
+export async function createProject(
+    prevState: FormState,
+    formData: FormData
+): Promise<FormState> {
+
+    const validatedFields = ProjectFormSchema.safeParse({
         title: formData.get("title"),
         description: formData.get("description"),
         type: formData.get("type"),
         technologies: formData.get("technologies"),
         link: formData.get("link"),
-    };
+        yearCompleted: formData.get("yearCompleted"),
+    });
 
-    // 4. Validate the submitted information
-    const validatedFields = ProjectSchema.safeParse(rawData);
-
+    // Return field-level validation errors if validation fails
     if (!validatedFields.success) {
-        throw new Error("Invalid project information. Please check your entries.");
+        return {
+            message: "Please correct the errors below.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
     }
 
-    // 5. Prepare the validated information
     const {
         title,
         description,
         type,
         technologies,
         link,
+        yearCompleted,
     } = validatedFields.data;
 
-    // Convert comma-separated technologies into an array
     const technologyList = technologies
         .split(",")
-        .map((technology) => technology.trim())
+        .map((tech) => tech.trim())
         .filter(Boolean);
 
-    // 6. Insert the new project into Neon
+    // Save the project to the database
     try {
         await sql`
-        INSERT INTO projects (
-            title,
-            description,
-            type,
-            technologies,
-        link
-    )
-    VALUES (
-        ${title},
-        ${description},
-        ${type},
-        ARRAY(
-            SELECT jsonb_array_elements_text(${JSON.stringify(technologyList)}::jsonb)
-        ),
-        ${link || null}
-    )
-`;
+            INSERT INTO projects (
+                title,
+                description,
+                type,
+                technologies,
+                link,
+                year_completed
+            )
+            VALUES (
+                ${title},
+                ${description},
+                ${type},
+                ARRAY(
+                    SELECT jsonb_array_elements_text(
+                        ${JSON.stringify(technologyList)}::jsonb
+                    )
+                ),
+                ${link || null},
+                ${yearCompleted}
+            )
+        `;
     } catch (error) {
-        console.error("Error inserting project:", error);
-        throw new Error("Failed to create the project. Please try again.");
-    }
-    // 7. Refresh the projects page
-    revalidatePath("/projects");
+        console.error("Error creating project:", error);
 
-    // 8. Redirect after successful creation
+        return {
+            message: "Database error. Unable to create project.",
+        };
+    }
+
+    revalidatePath("/projects");
     redirect("/projects");
 }
 
@@ -95,7 +92,7 @@ export async function updateProject(
         link: formData.get("link"),
     };
 
-    const validatedFields = ProjectSchema.safeParse(rawData);
+    const validatedFields = ProjectFormSchema.safeParse(rawData);
 
     if (!validatedFields.success) {
         throw new Error("Invalid project information.");
@@ -109,9 +106,9 @@ export async function updateProject(
         link,
     } = validatedFields.data;
 
-    const technologyList = technologies
+    const technologyList: string[] = technologies
         .split(",")
-        .map((technology) => technology.trim())
+        .map((technology: string) => technology.trim())
         .filter(Boolean);
 
     try {
