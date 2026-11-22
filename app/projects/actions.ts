@@ -54,22 +54,23 @@ export async function createProject(formData: FormData) {
 
     // 6. Insert the new project into Neon
     await sql`
-        INSERT INTO projects (
-            title,
-            description,
-            type,
-            technologies,
-            link
-        )
-        VALUES (
-            ${title},
-            ${description},
-            ${type},
-            ${technologyList},
-            ${link || null}
-        )
-    `;
-
+    INSERT INTO projects (
+        title,
+        description,
+        type,
+        technologies,
+        link
+    )
+    VALUES (
+        ${title},
+        ${description},
+        ${type},
+        ARRAY(
+            SELECT jsonb_array_elements_text(${JSON.stringify(technologyList)}::jsonb)
+        ),
+        ${link || null}
+    )
+`;
     // 7. Refresh the projects page
     revalidatePath("/projects");
 
